@@ -223,7 +223,7 @@ jobs:
           cp -R test "serverless-${PACKAGE_VERSION}/package"
           cp -R node_modules "serverless-${PACKAGE_VERSION}/package"
           cd "serverless-${PACKAGE_VERSION}/package"
-          npm test
+          script -e -c "npm test -- -b"
 
       # - name: Basic integration tests
       #   run: npm run integration-test-run-basic
