@@ -987,6 +987,7 @@ describe('AwsInvokeLocal', () => {
           await awsInvokeLocal.invokeLocalRuby('ruby', 'fixture/handler', 'withDeadlineMs');
 
           log.debug('test target %o', serverless.cli.consoleLog.lastCall.args);
+          console.log('ARGS', serverless.cli.consoleLog.lastCall.args)
           const result = JSON.parse(serverless.cli.consoleLog.lastCall.args[0]);
           expect(result.deadlineMs).to.be.closeTo(Date.now() + 6000, 2000);
         } catch (error) {
