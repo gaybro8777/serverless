@@ -170,6 +170,47 @@ jobs:
   #         CODECOV_TOKEN: 3898f3e1-f317-453e-a3a9-0462390f93c5
   #       run: npx codecov
 
+  prePublishPackageTest:
+    name: Prepublish package test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30 # Default is 360
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Retrieve dependencies from cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-v14-${{ runner.os }}-${{ github.ref }}-${{ hashFiles('package.json') }}
+
+      - name: Install Node.js and npm
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        if: steps.cacheNpm.outputs.cache-hit != 'true'
+        run: |
+          npm update --no-save
+          npm update --save-dev --no-save
+
+      - name: Build local package
+        run: npm pack
+
+      - name: Run tests against version packaged with npm pack
+        run: |
+          PACKAGE_VERSION=$(npm view . version)
+          mkdir "serverless-${PACKAGE_VERSION}"
+          tar zxf "serverless-${PACKAGE_VERSION}.tgz" -C "serverless-${PACKAGE_VERSION}"
+          cp -R test "serverless-${PACKAGE_VERSION}/package"
+          cp -R node_modules "serverless-${PACKAGE_VERSION}/package"
+          cd "serverless-${PACKAGE_VERSION}/package"
+          script -e -c "npm test -- -b"
+
   integrate:
     name: Integrate
     runs-on: ubuntu-latest
@@ -230,8 +271,8 @@ jobs:
 
       - name: Basic integration tests against standalone binary
         run: SERVERLESS_BINARY_PATH=./dist/serverless-linux npm run integration-test-run-basic
-      - name: Full integration tests against standalone binary
-        run: SERVERLESS_BINARY_PATH=./dist/serverless-linux npm run integration-test-run-all
+      # - name: Full integration tests against standalone binary
+      #   run: SERVERLESS_BINARY_PATH=./dist/serverless-linux npm run integration-test-run-all
 
       # - name: Resolve last validated commit hash (for `git diff` purposes)
       #   uses: actions/download-artifact@v2
