@@ -228,10 +228,10 @@ jobs:
       - name: Build standalone artifacts
         run: npm run pkg:build
 
-      - name: Basic integration tests against standalone
-        run: SERVERLESS_BINARY_PATH=./dist/serverless-linux2 npm run integration-test-run-basic
-      # - name: Full integration tests
-      #   run: npm run integration-test-run-all
+      - name: Basic integration tests against standalone binary
+        run: SERVERLESS_BINARY_PATH=./dist/serverless-linux npm run integration-test-run-basic
+      - name: Full integration tests against standalone binary
+        run: SERVERLESS_BINARY_PATH=./dist/serverless-linux npm run integration-test-run-all
 
       # - name: Resolve last validated commit hash (for `git diff` purposes)
       #   uses: actions/download-artifact@v2
